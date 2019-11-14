@@ -197,11 +197,11 @@ Here, `10.24.2.23` corresponds to the client pod running in the cluster.
 
 13. View the Kiali service graph.
 
-![screenshots/kiali.png]
+![kiali](screenshots/kiali.png)
 
 14. View Grafana metrics in the Istio Service Graph dashboard, by running `istioctl dashboard grafana`:
 
-![screenshots/grafana.png]
+![grafana](screenshots/grafana.png)
 
 Note that the spiky TCP traffic pattern corresponds to the write the client performs every two seconds.
 
