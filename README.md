@@ -3,6 +3,7 @@
 This demo walks through the process of installing Istio on a Kubernetes Cluster, then a Virtual Machine. Then, we install PostgreSQL on the VM, and a database client on the cluster. From there, we can see Istio-generated metrics for the client and the database, and use Istio policies to encrpypt all traffic between the client and the VM.
 
 
+- [📚 postgres-library](#%f0%9f%93%9a-postgres-library)
     - [1. Set variables](#1-set-variables)
     - [2. Create a GKE cluster.](#2-create-a-gke-cluster)
     - [3. Install Istio on the cluster.](#3-install-istio-on-the-cluster)
