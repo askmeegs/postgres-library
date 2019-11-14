@@ -3,4 +3,5 @@ istio-1.*
 *.env
 gce/temp/
 istio.yaml
+postgresql-1-vm/
 .DS_Store

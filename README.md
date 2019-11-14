@@ -162,7 +162,7 @@ kubectl create secret generic postgres --from-literal=password="<your-postgres-p
 9.  Deploy the PostgresSQL client. This client writes a book title to the database every two seconds.
 
 ```
-kubectl apply -f k8s.yaml
+kubectl apply -f manifests/k8s.yaml
 ```
 
 10. Get application logs to verify that writes are successful. You should see:
@@ -204,3 +204,9 @@ Here, `10.24.2.23` corresponds to the client pod running in the cluster.
 ![screenshots/grafana.png]
 
 Note that the spiky TCP traffic pattern corresponds to the write the client performs every two seconds.
+
+15. [Optional] Encrypt traffic between the client and postgres using mutual TLS authentication.
+
+```
+kubectl apply -f manifests/mtls.yaml
+```
