@@ -2,22 +2,22 @@
 
 This demo walks through the process of installing Istio on a Kubernetes Cluster, then a Virtual Machine. Then, we install PostgreSQL on the VM, and a database client on the cluster. From there, we can see Istio-generated metrics for the client and the database, and use Istio policies to encrpypt all traffic between the client and the VM.
 
-- [📚 postgres-library](#%f0%9f%93%9a-postgres-library)
+
     - [1. Set variables](#1-set-variables)
     - [2. Create a GKE cluster.](#2-create-a-gke-cluster)
-    - [3. Install Istio on the cluster. Enable Envoy access logs, to write all inbound and outbound requests to `stdout`.](#3-install-istio-on-the-cluster-enable-envoy-access-logs-to-write-all-inbound-and-outbound-requests-to-stdout)
+    - [3. Install Istio on the cluster.](#3-install-istio-on-the-cluster)
     - [4. Deploy PostgreSQL on a virtual machine.](#4-deploy-postgresql-on-a-virtual-machine)
     - [5. Allow Pod IP traffic to the VM.](#5-allow-pod-ip-traffic-to-the-vm)
     - [6. Prepare a `cluster.env` file to send to the VM.](#6-prepare-a-clusterenv-file-to-send-to-the-vm)
     - [7. Install Istio on the VM.](#7-install-istio-on-the-vm)
     - [8. Register the VM with Istio running on the GKE cluster:](#8-register-the-vm-with-istio-running-on-the-gke-cluster)
     - [9. Create a secret with postgres credentials.](#9-create-a-secret-with-postgres-credentials)
-    - [10. Deploy the PostgresSQL client. This client writes a book title to the database every two seconds.](#10-deploy-the-postgressql-client-this-client-writes-a-book-title-to-the-database-every-two-seconds)
-    - [11. Get application logs to verify that writes are successful. You should see:](#11-get-application-logs-to-verify-that-writes-are-successful-you-should-see)
-    - [12. View client-side `outbound` Envoy logs, for the postgres client. You should see outbound requests going to the VM:](#12-view-client-side-outbound-envoy-logs-for-the-postgres-client-you-should-see-outbound-requests-going-to-the-vm)
-    - [13. View server-side `inbound` Envoy logs, for the Envoy sitting in front of the database, on the VM. You must ssh into the VM to see the logs.](#13-view-server-side-inbound-envoy-logs-for-the-envoy-sitting-in-front-of-the-database-on-the-vm-you-must-ssh-into-the-vm-to-see-the-logs)
+    - [10. Deploy the PostgresSQL client.](#10-deploy-the-postgressql-client)
+    - [11. Get application logs to verify that writes are successful.](#11-get-application-logs-to-verify-that-writes-are-successful)
+    - [12. View client-side `outbound` Envoy logs, for the postgres client.](#12-view-client-side-outbound-envoy-logs-for-the-postgres-client)
+    - [13. View server-side `inbound` Envoy logs.](#13-view-server-side-inbound-envoy-logs)
     - [14. View the Kiali service graph.](#14-view-the-kiali-service-graph)
-    - [15. View Grafana metrics in the Istio Service Graph dashboard, by running `istioctl dashboard grafana`:](#15-view-grafana-metrics-in-the-istio-service-graph-dashboard-by-running-istioctl-dashboard-grafana)
+    - [15. View Grafana metrics in the Istio Service Graph dashboard.](#15-view-grafana-metrics-in-the-istio-service-graph-dashboard)
     - [16. [Optional] Encrypt traffic between the client and postgres using mutual TLS authentication.](#16-optional-encrypt-traffic-between-the-client-and-postgres-using-mutual-tls-authentication)
 
 ### 1. Set variables
@@ -54,7 +54,9 @@ gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE
 kubectl config use-context $CTX
 ```
 
-### 3. Install Istio on the cluster. Enable Envoy access logs, to write all inbound and outbound requests to `stdout`.
+### 3. Install Istio on the cluster.
+
+Enable Envoy access logs, to write all inbound and outbound requests to `stdout`.
 
 ```
 ISTIO_VERSION="1.3.4"  ./install-istio.sh
@@ -176,13 +178,17 @@ istioctl register -n ${SERVICE_NAMESPACE} ${SVC_NAME} ${GCE_IP} tcp:${PORT}
 kubectl create secret generic postgres --from-literal=password="<your-postgres-password>"
 ```
 
-### 10.  Deploy the PostgresSQL client. This client writes a book title to the database every two seconds.
+### 10.  Deploy the PostgresSQL client.
+
+This client writes a book title to the database every two seconds.
 
 ```
 kubectl apply -f manifests/k8s.yaml
 ```
 
-### 11. Get application logs to verify that writes are successful. You should see:
+### 11. Get application logs to verify that writes are successful.
+
+You should see:
 
 ```
 postgres-library-6bb956f86b-dt94x server ✅ inserted Fun Home
@@ -190,7 +196,9 @@ postgres-library-6bb956f86b-dt94x server ✅ inserted Infinite Jest
 postgres-library-6bb956f86b-dt94x server ✅ inserted To the Lighthouse
 ```
 
-### 12. View client-side `outbound` Envoy logs, for the postgres client. You should see outbound requests going to the VM:
+### 12. View client-side `outbound` Envoy logs, for the postgres client.
+
+You should see outbound requests going to the VM:
 
 ```
 postgres-library-6bb956f86b-dt94x istio-proxy [2019-11-14T19:07:00.106Z] "- - -" 0 - "-" "-" 260 441 258 - "-" "-" "-" "-" "10.128.0.14:5432" outbound|5432||postgresql-1-vm.default.svc.cluster.local 10.24.2.23:39540 10.0.24.255:5432 10.24.2.23:51654 - -
@@ -198,7 +206,9 @@ postgres-library-6bb956f86b-dt94x istio-proxy [2019-11-14T19:07:00.106Z] "- - -"
 
 Note that the `10.128.0.14` IP address, in this case, corresponds to the IP of the Virtual Machine, resolved through the Kubernetes Service Cluster IP (`10.0.24.255`) that was created when we ran `istioctl register`.
 
-### 13. View server-side `inbound` Envoy logs, for the Envoy sitting in front of the database, on the VM. You must ssh into the VM to see the logs.
+### 13. View server-side `inbound` Envoy logs.
+
+This is for the Envoy sitting in front of the database, on the VM. You must ssh into the VM to see the logs.
 
 ```
 tail -f /var/log/istio/istio.log
@@ -216,7 +226,9 @@ Here, `10.24.2.23` corresponds to the client pod running in the cluster.
 
 ![kiali](screenshots/kiali.png)
 
-### 15. View Grafana metrics in the Istio Service Graph dashboard, by running `istioctl dashboard grafana`:
+### 15. View Grafana metrics in the Istio Service Graph dashboard.
+
+Run `istioctl dashboard grafana`:
 
 ![grafana](screenshots/grafana.png)
 
