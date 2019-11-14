@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-library
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-library
+  template:
+    metadata:
+      labels:
+        app: postgres-library
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: server
+        image: gcr.io/megandemo/postgres-library:latest
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres
+                key: password
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-library
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres-library
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080

@@ -1,0 +1,6 @@
+*.pem
+istio-1.*
+*.env
+gce/temp/
+istio.yaml
+.DS_Store
